@@ -1,0 +1,185 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Workshop Exercise: Grouping, Summarizing and Plotting\"\n",
+        "---\n",
+        "\n",
+        "\n",
+        "### Load Packages\n"
+      ],
+      "id": "f4c1d22a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "import plotly.express as px"
+      ],
+      "id": "ec2fdc65",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Import Data\n"
+      ],
+      "id": "66a0b62a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Import the CSV file\n",
+        "india_tb = pd.read_csv(\"data/india_tuberculosis.csv\")\n",
+        "india_tb"
+      ],
+      "id": "f8151590",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#convert all column \n",
+        "india_tb.columns = india_tb.columns.str.lower().str.replace(' ', '_')\n",
+        "india_tb"
+      ],
+      "id": "192b2622",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Calculate Total Cost\n",
+        "Each patient record notes the location and cost of up to three visits. Add together these costs (`first_visit_cost`, `second_visit_cost`, and `third_visit_cost`) to create a `total_cost` variable.\n"
+      ],
+      "id": "9d8f37b4"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Calculate total cost\n",
+        "india_tb[\"total_cost\"] = india_tb[\"first_visit_cost\"].fillna(0) + india_tb[\"second_visit_cost\"].fillna(0) + india_tb[\"third_visit_cost\"].fillna(0)\n",
+        "\n",
+        "india_tb"
+      ],
+      "id": "597d3384",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Investigating Healthcare Costs by Education Level\n",
+        "\n",
+        "### Reorder Education Levels\n"
+      ],
+      "id": "cede5102"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Count unique values of education levels\n",
+        "india_tb[\"education\"].value_counts()"
+      ],
+      "id": "d68868f5",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Investigating Healthcare Costs by Education Level\n",
+        "\n",
+        "### Reorder Education Levels\n"
+      ],
+      "id": "bc37bc70"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# use the `replace()` method to convert the \"Graduate & Above\" values to \"Graduate\".\n",
+        "india_tb[\"education\"] = india_tb[\"education\"].replace(\"Graduate & Above\",\"Graduate\")\n",
+        "india_tb[\"education\"]"
+      ],
+      "id": "c13a63ea",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## To reorder the education levels: \n",
+        "By converting the `education` variable into a categorical variable with the levels defined in a specific order:\n"
+      ],
+      "id": "0eef6d35"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "education_levels = [\n",
+        "    \"No Education\",\n",
+        "    \"Primary\",\n",
+        "    \"Middle\",\n",
+        "    \"Secondary\",\n",
+        "    \"Higher Secondary\",\n",
+        "    \"Graduate\",\n",
+        "    \"Missing\",\n",
+        "]\n",
+        "\n",
+        "india_tb[\"education\"] = pd.Categorical(\n",
+        "    india_tb[\"education\"], categories=education_levels, ordered=True\n",
+        ")"
+      ],
+      "id": "a18685f6",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "india_tb[\"education\"].value_counts()"
+      ],
+      "id": "88f75f46",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Table of Costs by Education Level"
+      ],
+      "id": "afafffb7"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "C:\\Users\\Dell\\Documents\\CCFNKey Files_28012025\\Desktop Items_17012025\\Python Class The GRAPH\\gragh_courses_python\\.venv\\share\\jupyter\\kernels\\python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

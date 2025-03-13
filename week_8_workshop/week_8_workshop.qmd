@@ -1,0 +1,150 @@
+---
+title: "Workshop Exercise: Grouping, Summarizing and Plotting"
+---
+
+### Load Packages
+
+```{python}
+import pandas as pd
+import numpy as np
+import plotly.express as px
+```
+
+### Import Data
+
+```{python}
+# Import the CSV file
+india_tb = pd.read_csv("../data/india_tuberculosis.csv")
+india_tb
+```
+
+
+```{python}
+#convert all column 
+india_tb.columns = india_tb.columns.str.lower().str.replace(' ', '_')
+india_tb
+```
+### Calculate Total Cost
+Each patient record notes the location and cost of up to three visits. Add together these costs (`first_visit_cost`, `second_visit_cost`, and `third_visit_cost`) to create a `total_cost` variable.
+
+```{python}
+# Calculate total cost
+india_tb["total_cost"] = india_tb["first_visit_cost"].fillna(0) + india_tb["second_visit_cost"].fillna(0) + india_tb["third_visit_cost"].fillna(0)
+
+india_tb
+```
+## Investigating Healthcare Costs by Education Level
+
+### Reorder Education Levels
+
+```{python}
+# Count unique values of education levels
+india_tb["education"].value_counts()
+```
+
+## Investigating Healthcare Costs by Education Level
+
+### Reorder Education Levels
+
+```{python}
+# use the `replace()` method to convert the "Graduate & Above" values to "Graduate".
+india_tb["education"] = india_tb["education"].replace("Graduate & Above","Graduate")
+india_tb["education"]
+```
+## To reorder the education levels: 
+By converting the `education` variable into a categorical variable with the levels defined in a specific order:
+
+```{python}
+education_levels = [
+    "No Education",
+    "Primary",
+    "Middle",
+    "Secondary",
+    "Higher Secondary",
+    "Graduate",
+    "Missing",
+]
+
+india_tb["education"] = pd.Categorical(
+    india_tb["education"], categories=education_levels, ordered=True
+)
+```
+
+
+```{python}
+india_tb["education"].value_counts()
+```
+
+### Table of Costs by Education Level
+
+Use pandas methods to group by education level and create a summary table with two variables:
+
+- The number of patients in each education level
+- The mean total cost for each education level
+
+Store the resulting DataFrame as an object called `edu_cost_table`
+
+```{python}
+# Create summary table
+edu_cost_table = india_tb.groupby("education").agg(num_patients=("id","size"),
+mean_total_cost=("total_cost", "mean")).reset_index()
+
+edu_cost_table
+```
+
+Reorder the rows of the summary table to go from highest to lowest mean cost. You can use the `sort_values()` method to do this.
+
+
+```{python}
+# Reorder summary table
+edu_cost_table = edu_cost_table.sort_values(by='mean_total_cost', ascending=False)
+
+# Display the sorted table
+print(edu_cost_table)
+```
+
+Which education level has the highest mean total cost of treatment?
+
+Graduate
+
+### Visualize Costs by Education Level
+
+Using `plotly.express` and the costs summary table you created earlier, create a bar plot of mean costs by education level. It should be sorted from lowest education level to highest education level.
+
+
+```{python}
+
+edu_cost_table = edu_cost_table.sort_values(by="education")
+
+#create the bar chart
+fig = px.bar(
+    edu_cost_table,
+    x="education",
+    y="mean_total_cost",
+    title="Mean Total Cost by Education Level",
+    labels= {"education" : "Education Level", "mean_total_cost" : "Mean Total Cost"},
+    text="mean_total_cost"
+)
+
+# Format the text on bars
+fig.update_traces(texttemplate="%{text:.2f}", textposition="outside")
+
+fig.show()
+
+```
+
+ 
+ 
+## Update layout for better readability
+
+
+```{python}
+fig.update_layout(
+    xaxis_title="Education Level",
+    yaxis_title="Mean Total Cost",
+    showlegend=False
+)
+
+# Show the plot
+fig.show()  # Corrected method call
+```

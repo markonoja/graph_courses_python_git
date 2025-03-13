@@ -1,0 +1,126 @@
+## Load Packages and datasets
+
+```{python}
+# Packages
+import pandas as pd
+from country_converter import CountryConverter
+```
+
+```{python}
+
+
+# Load datasets
+oil_consumption = pd.read_csv("oil_consumption.csv")
+
+tidyr_population = pd.read_csv ("tidyr_population.csv")
+
+country_regions = pd.read_csv("country_continent_data.csv")
+
+
+
+oil_2012 = (
+    oil_consumption[oil_consumption["year"] == 2012].copy().drop(columns=["year"])
+)
+
+# people data
+people = pd.DataFrame({"name": ["Alice", "Bob", "Charlie"], "age": [25, 32, 45]})
+
+test_info_many = pd.DataFrame(
+    {
+        "name": ["Alice", "Alice", "Bob", "Bob", "Charlie", "Charlie"],
+        "test_date": [
+            "2023-06-05",
+            "2023-06-10",
+            "2023-08-10",
+            "2023-05-02",
+            "2023-05-12",
+            "2023-05-15",
+        ],
+        "result": [
+            "Negative",
+            "Positive",
+            "Positive",
+            "Negative",
+            "Negative",
+            "Negative",
+        ],
+    }
+)
+
+farm_info = pd.DataFrame(
+    {
+        "farm_id": [1, 2, 3],
+        "farm_name": ["Green Acres", "Harvest Hill", "Golden Fields"],
+        "location": ["County A", "County B", "County A"],
+    }
+)
+
+crop_yields = pd.DataFrame(
+    {
+        "farm_id": [1, 1, 2, 3, 3],
+        "crop": ["Wheat", "Corn", "Soybeans", "Wheat", "Barley"],
+        "yield_tons": [50, 60, 45, 55, 30],
+    }
+)
+
+traffic_flow = pd.DataFrame(
+    {
+        "street_name": [
+            "Main St",
+            "Main St",
+            "Broadway",
+            "Broadway",
+            "Elm St",
+            "Elm St",
+        ],
+        "time_of_day": ["9am", "2pm", "9am", "2pm", "9am", "2pm"],
+        "vehicle_count": [1200, 900, 1500, 1100, 700, 600],
+    }
+)
+
+pollution_levels = pd.DataFrame(
+    {
+        "street_name": [
+            "Main St",
+            "Main St",
+            "Broadway",
+            "Broadway",
+            "Elm St",
+            "Elm St",
+        ],
+        "time_of_day": ["9am", "2pm", "9am", "2pm", "9am", "2pm"],
+        "pm_2_5_level": [35.5, 42.1, 40.3, 48.2, 25.7, 30.9],
+    }
+)
+
+test_info_diff = pd.DataFrame(
+    {
+        "name": ["alice", "Bob", "Charlie "],
+        "test_date": ["2023-06-05", "2023-08-10", "2023-05-02"],
+        "result": ["Negative", "Positive", "Negative"],
+    }
+)
+
+asia_countries = pd.DataFrame(
+    {
+        "Country": ["India", "Indonesia", "Philippines"],
+        "Capital": ["New Delhi", "Jakarta", "Manila"],
+    }
+)
+
+asia_population = pd.DataFrame(
+    {
+        "Country": ["India", "indonesia", "Philipines"],
+        "Population": [1393000000, 273500000, 113000000],
+        "Life_Expectancy": [69.7, 71.7, 72.7],
+    }
+)
+```
+
+## One-to-many joins
+
+Adding more rows to a column of another dataset
+
+```{python}
+people
+```

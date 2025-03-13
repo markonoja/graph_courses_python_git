@@ -1,0 +1,115 @@
+# imports
+
+
+```{python}
+import pandas as pd
+pd.set_option('display.max_columns', None)
+```
+
+# Get the Data
+
+
+```{python}
+df = pd.read_csv("week_5_workshop/loans_full_schema.csv")
+```
+
+# Drop a column : rownames
+
+From the df dataframe, drop the column called rownames
+
+```{python}
+df_no_rownames = df.drop(columns=["rownames"])
+```
+
+# Create and Export Data Subsets
+
+```{python}
+# | eval: false
+# Export to CSV
+df.to_csv('week_5_workshop/outputs/df_no_rownames.csv', index = False)
+```
+
+## Data Subset 1: Extract demographic and loan information
+
+Create a subset containing the following demographic information (employment title, employment length, state, homeownership status) and loan details (loan amount, loan term, and interest rate). You may need to consult the data dictionary to identify which variables you need. Call your subset `demog_loan_info`
+
+```{python}
+demog_loan_info = df_no_rownames[["emp_title","emp_length", "state", "homeownership", "loan_amount", "term", "interest_rate"]]
+
+# Rename term column to 'loan_term_months'
+
+demog_loan_info = demog_loan_info.rename(columns = {"term": "loan_term_months"})
+
+# Export to a CSV file
+
+demog_loan_info.to_csv('week_5_workshop/outputs/demog_loan_info.csv', index = False)
+demog_loan_info
+```
+
+## Data Subset 2: Extract credit evaluation variables
+
+Create a subset with all credit-related variables. Use filtering with the `filter()` method and the `regex` argument to select variables that contain "credit" in their names. Call your subset `credit_vars`
+
+
+```{python}
+credit_vars = df_no_rownames.filter(regex= "credit")
+credit_vars.to_csv('week_5_workshop/outputs/credit_vars.csv', index=False)
+```
+
+## Data Subset 3: Extract high-income borrowers
+
+```{python}
+ high_income = df_no_rownames.query("annual_income >100000")
+ high_income.to_csv('week_5_workshop/outputs/high_income.csv', index= False)
+```
+
+## Data Subset 4: Extract high-risk loans 
+
+
+```{python}
+high_risk = df_no_rownames.query("interest_rate > 15 | debt_to_income >30 | delinq_2y < 2" )
+high_risk.to_csv('week_5_workshop/outputs/high_risk.csv', index= False)
+```
+
+## Data Subset 5: Extract "prime" borrowers
+
+
+```{python}
+prime = df_no_rownames.query("grade == 'A' | grade == 'B' & debt_to_income < 20 & delinq_2y > 2")
+prime.to_csv('week_5_workshop/outputs/prime.csv', index= False)
+```
+
+
+## Optional Challenge: Export to Excel
+
+
+```{python}
+# | eval: false
+import openpyxl # important to install this package
+import plotly.express as px
+```
+
+```{python}
+loans = df.to_excel('week_5_workshop/outputs/loans.xlsx', index = False, engine= "openpyxl")
+```
+
+
+# Create some sample subsets: excel
+
+```{python}
+demog_loan_info = loans[["emp_title","emp_length", "state", "homeownership", "loan_amount", "term", "interest_rate"]]
+high_risk = loans.query("interest_rate > 15 | debt_to_income >30 | delinq_2y < 2" )
+credit_vars = loans.filter(regex= "credit")
+high_income = loans.query("annual_income >100000")
+prime = loans.query("grade == 'A' | grade == 'B' & debt_to_income < 20 & delinq_2y > 2")
+```
+
+
+
+```{python}
+# Use the ExcelWriter to export each subset to a separate sheet
+with pd.ExcelWriter('outputs/tips_subsets.xlsx') as writer:
+    sunday_tips.to_excel(writer, sheet_name='Sunday', index=False)
+    saturday_tips.to_excel(writer, sheet_name='Saturday', index=False)
+    friday_tips.to_excel(writer, sheet_name='Friday', index=False)
+```

@@ -1,0 +1,67 @@
+---
+title: "My First quarto Doc"
+author: "Mark Onoja"
+format: pdf
+execute: 
+  echo: false
+---
+
+Markdown lets you use *italics* and also **embolden** text 
+
+You can also define bulleted lists:
+
+- First element
+- Second element
+
+You can also add [links](https://thegraphcourses.org)
+
+You can also embed images
+
+![description of the image](images\tgc_unity-768x568.webp)
+
+# level 1 Header
+## Level 2 Header
+### Level 3 Header
+```{python}
+2 + 2
+#| echo: false
+#| eval: false
+```
+```{python}
+3 * 3
+```
+```{python}
+3 * 4
+for num in [1,2,3]:
+    print(num)
+4 * 4
+```
+
+# Displaying Tables
+
+```{python}
+import plotly.express as px
+from itables import show
+
+tips = px.data.tips()
+show(tips)
+```
+
+```{python}
+tips
+```
+# Displaying Plots
+
+```{python}
+px.violin(tips, x="tip", y="sex")
+```
+
+# Displaying Static Plots
+
+
+```{python}
+tips_sex = px.violin(tips, x="tip", y="sex")
+tips_sex.write_image('outputs/tips by sex.png')
+```
+
+![](outputs\tips%by%sex.png)

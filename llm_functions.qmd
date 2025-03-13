@@ -1,0 +1,163 @@
+## Imports
+
+```{python}
+from openai import OpenAI
+import pandas as pd
+import numpy as np
+from local_settings import OPENAI_KEY
+```
+
+# Setting up the Openai Client
+
+
+```{python}
+client = OpenAI(api_key=OPENAI_KEY)
+```
+
+# Making our first call 
+
+```{python}
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", 
+               "content": "what is the most tourist-friendly in France?"}]
+)
+```
+
+# Code to pull out just the response
+```{python}
+response.choices[0].message.content
+```
+
+## Defining a Helper Function
+
+
+```{python}
+def llm_chat(message): 
+    response = client.chat.completions.create( 
+          model="gpt-4o-mini", messages=[{"role": "user", 
+          "content": message}]      
+    )
+    return response.choices[0].message.content     
+```
+
+
+```{python}
+llm_chat("Tell me why Python is an awesome Language")
+```
+
+## Practice Q: Get tourist-friendly city in Brazil
+Use the llm_chat function to ask the model for the most tourist-friendly city in Brazil. Store the response in a variable called rec_brazil. Print the response.
+
+
+```{python}
+rec_brazil = llm_chat("what is the most tourist-friendly city in Brazil?")
+
+```
+
+## print Response
+```{python}
+print(
+rec_brazil)
+```
+
+## Variables as Prompt Inputs
+
+
+```{python}
+def city_rec(country):
+    prompt = f"what is the tourist-friendly city in {country}?"
+    return llm_chat(prompt)
+
+city_rec_vec = np.vectorize(city_rec)  
+```
+
+
+```{python}
+city_rec("Nigeria")
+```
+
+```{python}
+city_rec_vec(["Nigeria", "Chile"])
+```
+
+## Applying City_rec function over an array of function
+
+```{python}
+country_df = pd.DataFrame({"country" : ["Nigeria", "Chile", "France", "Canada"]})
+
+country_df
+```
+
+
+```{python}
+# Using the vectorized function on a dataframe
+
+country_df["city_rec"] = city_rec_vec(country_df["country"])
+country_df.to_csv # write to csv function
+```
+
+## Practice Q: Get local dishes
+
+Create a function called get_local_dishes that takes a country name as input and returns 
+some of the most famous local dishes from that country. Then, vectorize this function and 
+apply it to the country_df DataFrame to add a column with local dish recommendations for 
+each country.
+
+
+```{python}
+def get_local_dishes(country):
+    prompt = f"what is the local dish in {country}?"
+    return llm_chat(prompt)
+
+city_dish_vec = np.vectorize(get_local_dishes) 
+```
+
+
+```{python}
+# Using the vectorized function on a dataframe
+
+country_df["get_local_dishes"] = city_dish_vec(country_df["country"])
+country_df.to_csv # write to csv function
+```
+
+## Automated Summary: Movies dataset
+
+```{python}
+import vega_datasets as vd
+
+movies = vd.data.movies().head()
+movies
+```
+
+## Convert the movies object into a dictionary
+
+```{python}
+# Store in a column in the movies dataset
+movies["full_dict"] = movies.to_dict(orient="records")
+movies
+```
+
+## Send information to the model
+## and summarize
+
+```{python}
+def movie_performance(movie_data):
+    prompt = f"Considering the following 
+    data on this movie {movie_data},
+    provide a one paragraph summary of its 
+    performance for my report."
+
+    return llm_chat(prompt)
+    movies_performance_vec = np.vectorize(movie_performance)
+```
+
+```{python}
+movie_performance("Name : Kene's movie. Sales:100,000 USD")
+```
+
+
+```{python}
+movies["llm_summary"] = movie_performance_vec(movie["full_dict"])
+movies.to_csv("output/movies_output.csv")
+```

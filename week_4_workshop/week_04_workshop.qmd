@@ -1,0 +1,57 @@
+---
+title: "India TB Pathways Analysis"
+author: "Mark Onoja"
+format: pdf
+execute:
+  echo: false  
+---
+
+
+```{python}
+# import packages
+import pandas as pd
+import plotly.express as px
+import itables as it
+```
+
+# intro to dataset
+
+In this report, we analyse a dataset on India TB Pathways 
+
+# Load the dataset
+
+```{python}
+data_tb = pd.read_csv("india_tb_pathways_and_costs.csv")
+``` 
+
+# Show the first rows of the dataset
+
+```{python}
+#| echo : false
+from itables import show
+
+show(data_tb.head())
+```
+
+
+# Tamil Nedu map
+```{python}
+#| echo : false
+![Map of Tamil Nedu. Vellore district is in the north-east.](images\tndistrict_1.png)
+```
+
+# Graphical representation
+
+```{python}
+#| echo : false
+px.histogram(data_tb, y= "Education", color= "Form of TB", 
+text_auto =True, 
+title = "Relationship between Education and Form of TB", 
+labels = {"Form of TB" : "Form of Tuberculosis", "Education" : "Level of Education" } )
+```
+
+
+**Interpretation**
+
+Tuberculosis (TB) is more present in clients with no level of education. This implies that those group of clients have no no knowledge of how TB is transmitted and are therefore s=exposed.
+So the higher the level of education, the lower the risk of exposure that leads to possible TB.

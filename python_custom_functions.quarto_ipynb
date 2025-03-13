@@ -1,0 +1,39 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Learning Objectives\n",
+        "- Create and use your own functions in Python.\n",
+        "- Design function arguments and set default values.\n",
+        "- Use conditional logic like if, elif, and else within functions.\n",
+        "\n",
+        "# Import libraries\n"
+      ],
+      "id": "e16bcdd1"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "import vega_datasets as vd"
+      ],
+      "id": "d9a2a357",
+      "execution_count": null,
+      "outputs": []
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "C:\\Users\\Dell\\Documents\\CCFNKey Files_28012025\\Desktop Items_17012025\\Python Class The GRAPH\\gragh_courses_python\\.venv\\share\\jupyter\\kernels\\python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

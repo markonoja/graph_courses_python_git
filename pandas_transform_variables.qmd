@@ -1,0 +1,139 @@
+
+# Learning Objectives
+
+- Understand how to create new variables in a DataFrame.
+- Learn how to modify existing variables.
+- Handle potential issues with modifying variables on views.
+
+# Imports
+
+
+```{python}
+import pandas as pd
+
+pd.options.mode.copy_on_write = True
+```
+
+# Dataset
+
+
+```{python}
+counties = pd.read_csv("data/us_counties_data.csv")
+counties
+```
+
+# Create a subset
+
+
+```{python}
+area_df =counties[["county", "area_sq_miles", "pop_20"]]
+area_df
+```
+
+# Creating New variables
+
+
+```{python}
+# New var with area in sq km
+area_df["area_sq_km"] = area_df  ["area_sq_miles"] * 2.59
+# New var with area in hectares
+area_df["area_hectares"] = area_df["area_sq_km"] * 100
+
+area_df
+```
+
+# Practice Q: Area in Acres
+
+Using the area_df dataset, create a new column called area_acres by multiplying the area_sq_miles variable by 640. Store the result back into area_df and display the DataFrame.
+
+
+```{python}
+# New var with area in acres
+area_df["area_acres"] = area_df ["area_sq_miles"] * 640
+area_df
+```
+
+# Modifying Existing Variables
+
+
+```{python}
+area_df["area_sq_km"] = area_df["area_sq_km"].round(2)
+area_df
+```
+
+# Practice Q:Rounding area_acres
+Using the area_df dataset, round the area_acres variable to one decimal place. Update the DataFrame area_df and display it.
+
+
+```{python}
+area_df["area_acres"] = area_df["area_acres"].round(1)
+area_df
+```
+
+# Calculating with Multiple Variables
+
+
+```{python}
+# calculating population density
+area_df["pop_per_sq_km"] = (area_df["pop_20"] / area_df["area_sq_km"]).round(1)
+
+# Sort by population density in descending order
+area_df = area_df.sort_values("pop_per_sq_km", ascending=False)
+area_df
+```
+
+# Practice Q: Calculate Foreign-Born Percentage
+Use the counties dataset to calculate the percentage of foreign-born residents in each county. The variable foreign_born_num shows the number of foreign-born residents and pop_20 shows the total population. Sort the DataFrame in descending order of the percentage of foreign-born residents. Which two counties have the highest percentage of foreign-born residents?
+
+```{python}
+counties["percent_foreign_born"] = ((counties["foreign_born_num"] / counties["pop_20"]) * 100).round(2)
+
+# Sort by percent_foreign_born in descending order
+counties = counties.sort_values("percent_foreign_born", ascending=False)
+counties
+```
+
+# Creating Boolean Variables
+
+```{python}
+changes_df = counties [["county", "pop_change_2010_2020", "pct_emp_change_2010_2021"]]
+changes_df
+```
+
+```{python}
+# Check if population increase between 2010 and 2020
+changes_df["pop_increase"] = changes_df["pop_change_2010_2020"] > 0
+# Check if employment increase between 2010 and 2021
+changes_df["emp_increase"] = changes_df["pct_emp_change_2010_2021"] > 0
+changes_df
+```
+
+# Countries where population increased but employment decreased
+
+```{python}
+# The two queries are equivalent
+
+pop_up_emp_down = changes_df.query("pop_increase == True & emp_increase == False")
+pop_up_emp_down = changes_df.query("pop_increase & ~(emp_increase)")
+pop_up_emp_down
+```
+
+# Practice Q: Categorize Counties by Foreign-Born Population
+
+In a previous practice question, we calculated the percentage of foreign-born residents in each county. Now, create a Boolean variable foreign_born_pct_gt_30 that is True if the percentage is greater than 30%.
+
+When you’re done, query the DataFrame to show only counties where foreign_born_pct_gt_30 is True. You should get 24 rows.
+
+
+```{python}
+counties["foreign_born_pct_gt_30"] = counties["percent_foreign_born"] > 30
+foreign_born_pct_gt_30 = counties.query("foreign_born_pct_gt_30 == True")
+foreign_born_pct_gt_30
+```
+
+# The Copy-on-Write Warning
+
+
+```{python}
+pd.options.mode.copy_on_write = True
+```
