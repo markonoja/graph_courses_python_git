@@ -1,0 +1,370 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Workshop Exercise: Emissions Data - Table, Map, and Chart\"\n",
+        "format: html\n",
+        "---\n",
+        "\n",
+        "\n",
+        "# Introduction\n",
+        "\n",
+        "In this exercise, you will work with a CO2 emissions dataset downloaded from Gapminder and produce a report with three tabs: a data table, a line chart, and a choropleth map. \n",
+        "\n",
+        "The goal is to roughly replicate the [Our World in Data visualization page on consumption-based CO<sub>2</sub> emissions](https://ourworldindata.org/grapher/consumption-co2-emissions?tab=table&time=2000..2022).\n",
+        "\n",
+        "Be sure to view that page to get an idea of the final product.\n",
+        "\n",
+        "# Setup\n",
+        "\n",
+        "- You should have forked and cloned this repository to your local machine.\n",
+        "\n",
+        "- Now, create and select a virtual environment in VSCode.\n",
+        "\n",
+        "- Install the following packages: \n",
+        "  - pandas\n",
+        "  - plotly\n",
+        "  - itables\n",
+        "  - ipykernel\n",
+        "  - jupyter\n",
+        "  - country_converter\n",
+        "\n",
+        "- Download the data from [Gapminder](https://www.gapminder.org/data/) by selecting: *Environment > Emissions > CO2 Total emissions*, then downloading the CSV file into a `data` folder in your repository.\n",
+        "\n",
+        "# Data Import\n",
+        "\n",
+        "Run the following code to import the necessary libraries:\n"
+      ],
+      "id": "7cb35a88"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "import plotly.express as px\n",
+        "import plotly.io as pio \n",
+        "from itables import show\n",
+        "import country_converter as coco"
+      ],
+      "id": "9a618ebb",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Load in your dataset from gapminder below. View it in your data viewer to get an idea of the structure.\n"
+      ],
+      "id": "fb5d3e3d"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Load the data\n",
+        "emissions = pd.read_csv(\"data/co2_cons.csv\")"
+      ],
+      "id": "fb9fc590",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Initial Cleaning\n",
+        "\n",
+        "In this dataset, some values are given in thousands, with a \"k\" used to represent the thousands. This will cause problems when we try to make these columns numeric. So we need to clean this. We'll do this for you, but pay close attention as you might need it for your final project.\n",
+        "\n",
+        "First, let's see the issue:\n"
+      ],
+      "id": "aa3ca49c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "emissions.query(\"country == 'China'\")[[\"country\",  \"2020\", \"2021\", \"2022\"]]"
+      ],
+      "id": "7e6e5e4d",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Notice the letter \"k\" at the end of \"10.6k\" as an example.\n",
+        "\n",
+        "We can remove the \"k\" and multiply those values by 1000 with the following code:\n"
+      ],
+      "id": "ee889b65"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "for col in [\"2021\", \"2022\"]:\n",
+        "    has_k = emissions[col].str.contains(\"k\")\n",
+        "    values = emissions[col].str.replace(\"k\", \"\")\n",
+        "    emissions[col] = np.where(has_k, values.astype(float) * 1000, values.astype(float))"
+      ],
+      "id": "73cdc0a9",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "And check that it worked:\n"
+      ],
+      "id": "bcd02eeb"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "emissions.query(\"country == 'China'\")[[\"country\",  \"2020\", \"2021\", \"2022\"]]"
+      ],
+      "id": "9a9309b5",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Table Section\n",
+        "\n",
+        "Our goal is to create a table showing emissions for a few selected years and calculate absolute and relative changes.\n",
+        "\n",
+        "1. Subset the data to include `Country`, `2000`, and `2022` columns only.\n",
+        "2. Calculate an \"Absolute Change\" column as the difference between 2022 and 2000.\n",
+        "3. Calculate a \"Relative Change\" column as the absolute change divided by the 2000 emissions, then multiplied by 100.\n"
+      ],
+      "id": "755c1017"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Subset the data to include `country`, `2000`, and `2022` columns only.\n",
+        "table_df = emissions[['country', '2000', '2022']]\n",
+        "\n",
+        "# Calculate absolute change as the difference between 2022 and 2000\n",
+        "table_df[\"Absolute Change\"] = table_df['2022'] - table_df['2000']\n",
+        "\n",
+        "# Calculate relative change as the absolute change divided by the 2000 emissions, then multiplied by 100\n",
+        "table_df[\"Relative Change\"] = (table_df['Absolute Change'] / table_df['2000']) * 100\n",
+        "\n",
+        "# Round to 0 decimal places, and add a % sign to the relative change\n",
+        "table_df[\"Relative Change\"] = table_df[\"Relative Change\"].round(0).astype(str) + \"%\""
+      ],
+      "id": "b3eecd30",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Now we can display this as an interactive table with itables:\n"
+      ],
+      "id": "649fbfea"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "show(table_df)"
+      ],
+      "id": "f36151ad",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Chart Section\n",
+        "\n",
+        "Our goal is to create a line chart from 1990 to 2022 for a few selected countries.\n",
+        "\n",
+        "1. Melt the original `emissions` dataset so that years become rows.\n",
+        "2. Filter from 1990 to 2022 only.\n",
+        "3. Choose 5 countries of your choice.\n",
+        "4. Create a line chart showing emissions over time for the selected countries with Plotly Express.\n"
+      ],
+      "id": "6f39f63c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Melt the original `emissions` dataset. Your id_vars should be \"country\", your var_name should be \"year\" and your value_name should be \"emissions\".\n",
+        "emissions_long = pd.melt(\n",
+        "    emissions,\n",
+        "    id_vars=['country'],         # Column(s) to keep as identifiers\n",
+        "    var_name='year',             # Name of the new column for years\n",
+        "    value_name='emissions'       # Name of the new column for emissions values\n",
+        ")\n",
+        "\n",
+        "# Convert year to numeric using pd.to_numeric\n",
+        "emissions_long[\"year\"] = pd.to_numeric(emissions_long['year'])\n",
+        "\n",
+        "# Convert emissions to numeric using pd.to_numeric. Here, we also convert dashes to the minus sign\n",
+        "emissions_long[\"emissions\"] = pd.to_numeric(emissions_long[\"emissions\"].astype(str).str.replace(\"−\", \"-\"))\n",
+        "\n",
+        "# Query for years between 1990 and 2022 (that is 1990, 1991, ..., 2021, 2022)\n",
+        "emissions_long_1990_2022 = emissions_long.query('1990 <= year <= 2022')\n",
+        "\n",
+        "\n",
+        "# Query for 5 countries (adjust these to any countries you like)\n",
+        "emissions_long_1990_2022 = emissions_long.query('country in [\"Nigeria\", \"Canada\", \"Finland\", \"Australia\", \"Russia\"]')\n",
+        "\n",
+        "# Create line chart. Year should be on the x-axis, emissions on the y-axis, and color should be by country.\n",
+        "fig_chart = px.line(\n",
+        "    emissions_long_1990_2022,    # DataFrame to use\n",
+        "    x='year',                    # Column for x-axis\n",
+        "    y='emissions',               # Column for y-axis\n",
+        "    color='country',             # Column to determine line colors\n",
+        "    title='Emissions Over Time by Country',  # Chart title\n",
+        "    labels={\n",
+        "        'year': 'Year',          # Customize x-axis label\n",
+        "        'emissions': 'Emissions',# Customize y-axis label\n",
+        "        'country': 'Country'     # Customize legend title\n",
+        "    }\n",
+        ")"
+      ],
+      "id": "56e18b21",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Mapping Section\n",
+        "\n",
+        "This part is done for you.\n",
+        "\n",
+        "**Goal:** Create a choropleth map showing global emissions from 1990 to 2022.  \n",
+        "\n",
+        "This will be animated by year.\n",
+        "\n",
+        "1. Ensure each country has a 3-letter ISO code. We'll use `country_converter` for that.\n",
+        "2. Create a map with `px.choropleth` and use `animation_frame` to show changes over time.\n"
+      ],
+      "id": "fd3c624a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Convert country names to ISO3 codes\n",
+        "emissions_long_1990_2022[\"country_code\"] = coco.convert(\n",
+        "    emissions_long_1990_2022[\"country\"], to=\"ISO3\"\n",
+        ")\n",
+        "\n",
+        "fig_map = px.choropleth(\n",
+        "    emissions_long_1990_2022,\n",
+        "    locations=\"country_code\",\n",
+        "    color=\"emissions\",\n",
+        "    hover_name=\"country\",\n",
+        "    animation_frame=\"year\",\n",
+        "    title=\"Global CO2 Emissions (1990-2022)\",\n",
+        ")\n",
+        "\n",
+        "fig_map.show()"
+      ],
+      "id": "2c0fa80d",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Final Tabset\n",
+        "\n",
+        "Below, we place our results into a tabbed interface.\n",
+        "\n",
+        "::: {.panel-tabset}\n",
+        "\n",
+        "## Table\n"
+      ],
+      "id": "772da453"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "show(table_df)"
+      ],
+      "id": "ca014190",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Chart\n"
+      ],
+      "id": "0e8020dd"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "fig_chart.show()"
+      ],
+      "id": "682247a0",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Map\n"
+      ],
+      "id": "9377b8f4"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "fig_map.show()"
+      ],
+      "id": "a979f3d7",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        ":::"
+      ],
+      "id": "5cc6c765"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "C:\\Users\\Dell\\Documents\\GitHub\\graph_courses_python_git\\.venv\\share\\jupyter\\kernels\\python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
